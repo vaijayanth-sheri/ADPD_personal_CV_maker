@@ -7,8 +7,8 @@ import { UploadCloud, FileText, Loader2, Trash2 } from "lucide-react";
 
 type TemplateFile = {
   name: string;
-  id: string;
-  created_at: string;
+  id: string | null;
+  created_at: string | null;
   size: number;
 };
 
@@ -37,8 +37,8 @@ export default function TemplatesPage() {
       // Filter out standard placeholder if present
       const files = data.filter(f => f.name !== '.emptyFolderPlaceholder').map(f => ({
         name: f.name,
-        id: f.id || "",
-        created_at: f.created_at || new Date().toISOString(),
+        id: f.id,
+        created_at: f.created_at,
         size: f.metadata?.size || 0
       }));
       setTemplates(files);
@@ -172,7 +172,7 @@ export default function TemplatesPage() {
                         {template.name}
                       </h4>
                       <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
-                        {formatBytes(template.size)} • Uploaded {new Date(template.created_at).toLocaleDateString()}
+                        {formatBytes(template.size)} • Uploaded {template.created_at ? new Date(template.created_at).toLocaleDateString() : 'Unknown date'}
                       </p>
                     </div>
                   </div>
