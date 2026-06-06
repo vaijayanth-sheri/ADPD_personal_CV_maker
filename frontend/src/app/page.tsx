@@ -1,13 +1,42 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
-import { FileText, Briefcase, FilePlus, ChevronRight, Clock, CheckCircle2 } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { FileText, Briefcase, FilePlus, ChevronRight, Clock, CheckCircle2, Loader2 } from "lucide-react";
 import Link from "next/link";
 
 export default function Home() {
   const { user } = useAuth();
-  
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({ cvs: 0, coverLetters: 0, total: 0 });
+  const [recentApps, setRecentApps] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (user) {
+      loadDashboardData();
+    }
+  }, [user]);
+
+  const loadDashboardData = async () => {
+    setLoading(true);
+    
+    const { data: apps, error } = await supabase
+      .from("applications")
+      .select("*")
+      .eq("user_id", user?.id)
+      .order("created_at", { ascending: false });
+
+    if (!error && apps) {
+      const cvs = apps.filter(a => a.doc_type === "cv").length;
+      const coverLetters = apps.filter(a => a.doc_type === "cover_letter").length;
+      setStats({ cvs, coverLetters, total: apps.length });
+      setRecentApps(apps.slice(0, 5)); // show latest 5
+    }
+
+    setLoading(false);
+  };
+
   return (
     <div className="space-y-8 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header Section */}
@@ -24,24 +53,27 @@ export default function Home() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatCard
           title="CVs Generated"
-          value="12"
+          value={stats.cvs.toString()}
           trend="Total in system"
-          icon={FileText}
+          icon={Briefcase}
           color="blue"
+          loading={loading}
         />
         <StatCard
           title="Cover Letters"
-          value="8"
+          value={stats.coverLetters.toString()}
           trend="Total in system"
           icon={FilePlus}
           color="emerald"
+          loading={loading}
         />
         <StatCard
-          title="Success Rate"
-          value="15%"
-          trend="Estimated match"
+          title="Applications"
+          value={stats.total.toString()}
+          trend="Total generated"
           icon={CheckCircle2}
           color="purple"
+          loading={loading}
         />
       </div>
 
@@ -65,7 +97,7 @@ export default function Home() {
               </div>
               <div className="flex gap-3">
                 <div className="w-6 h-6 rounded-full bg-brand-200 dark:bg-brand-500/30 flex items-center justify-center font-bold text-brand-700 dark:text-brand-300 shrink-0">3</div>
-                <p><strong>Upload Content:</strong> Drop a markdown (.md) file containing the job description and your custom content to merge into the template.</p>
+                <p><strong>Upload Content:</strong> Enter job details and drop a markdown (.md) file to merge into the template.</p>
               </div>
             </div>
             
@@ -92,35 +124,41 @@ export default function Home() {
           </div>
 
           <div className="space-y-3">
-            {[
-              { type: "CV", role: "Frontend Engineer", company: "Vercel", date: "2h ago", color: "blue" },
-              { type: "Cover Letter", role: "UI Engineer", company: "Stripe", date: "Yesterday", color: "emerald" },
-              { type: "CV", role: "Product Engineer", company: "Linear", date: "2 days ago", color: "blue" },
-            ].map((app, i) => (
-              <div 
-                key={i} 
-                className="group p-4 rounded-xl border border-slate-200 dark:border-zinc-800 bg-surface hover:shadow-md transition-all cursor-pointer flex items-center justify-between"
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                    app.color === 'blue' 
-                      ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400' 
-                      : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                  }`}>
-                    {app.type === 'CV' ? <Briefcase className="w-5 h-5" /> : <FilePlus className="w-5 h-5" />}
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-slate-900 dark:text-zinc-100 truncate max-w-[140px]">
-                      {app.role}
-                    </h4>
-                    <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
-                      {app.company} • {app.date}
-                    </p>
-                  </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+            {loading ? (
+              <div className="p-8 flex justify-center text-brand-500">
+                <Loader2 className="w-6 h-6 animate-spin" />
               </div>
-            ))}
+            ) : recentApps.length === 0 ? (
+              <div className="p-8 rounded-xl border border-slate-200 dark:border-zinc-800 bg-surface text-center text-slate-500 dark:text-zinc-400 text-sm">
+                No history yet. Start generating!
+              </div>
+            ) : (
+              recentApps.map((app) => (
+                <div 
+                  key={app.id} 
+                  className="group p-4 rounded-xl border border-slate-200 dark:border-zinc-800 bg-surface hover:shadow-md transition-all cursor-pointer flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                      app.doc_type === 'cv' 
+                        ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400' 
+                        : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                    }`}>
+                      {app.doc_type === 'cv' ? <Briefcase className="w-5 h-5" /> : <FilePlus className="w-5 h-5" />}
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-slate-900 dark:text-zinc-100 truncate max-w-[140px]">
+                        {app.job_title}
+                      </h4>
+                      <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
+                        {app.company} • {new Date(app.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-slate-400 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                </div>
+              ))
+            )}
           </div>
 
         </div>
@@ -130,7 +168,7 @@ export default function Home() {
 }
 
 // Helper component for stats
-function StatCard({ title, value, trend, icon: Icon, color }: any) {
+function StatCard({ title, value, trend, icon: Icon, color, loading }: any) {
   const colorMap: Record<string, string> = {
     blue: "bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 ring-blue-100 dark:ring-blue-500/20",
     emerald: "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 ring-emerald-100 dark:ring-emerald-500/20",
@@ -148,9 +186,13 @@ function StatCard({ title, value, trend, icon: Icon, color }: any) {
         </div>
       </div>
       <div className="flex items-baseline gap-2">
-        <span className="text-3xl font-bold text-slate-900 dark:text-zinc-50">
-          {value}
-        </span>
+        {loading ? (
+          <div className="h-8 w-16 bg-slate-100 dark:bg-zinc-800 animate-pulse rounded-md"></div>
+        ) : (
+          <span className="text-3xl font-bold text-slate-900 dark:text-zinc-50">
+            {value}
+          </span>
+        )}
       </div>
       <p className="text-xs text-slate-500 dark:text-zinc-400 mt-2">
         {trend}

@@ -1,16 +1,40 @@
 "use client";
 
-import React, { useState, useRef } from "react";
-import { UploadCloud, FileText, ArrowLeft, Loader2, Briefcase, FileOutput } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { useAuth } from "@/components/AuthProvider";
+import { supabase } from "@/lib/supabase";
+import { UploadCloud, FileText, ArrowLeft, Loader2, Briefcase, FileOutput, CheckCircle2 } from "lucide-react";
 
 export default function CVPage() {
+  const { user } = useAuth();
   const [isDragging, setIsDragging] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [parsedSections, setParsedSections] = useState<Record<string, string> | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  
   const [format, setFormat] = useState<'docx' | 'pdf'>('docx');
+  const [templates, setTemplates] = useState<string[]>([]);
+  const [selectedTemplate, setSelectedTemplate] = useState<string>("");
+  const [jobTitle, setJobTitle] = useState("");
+  const [company, setCompany] = useState("");
+
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (user) {
+      loadTemplates();
+    }
+  }, [user]);
+
+  const loadTemplates = async () => {
+    const { data, error } = await supabase.storage.from("user_templates").list(`${user?.id}/`);
+    if (!error && data) {
+      const files = data.filter(f => f.name !== '.emptyFolderPlaceholder').map(f => f.name);
+      setTemplates(files);
+      if (files.length > 0) setSelectedTemplate(files[0]);
+    }
+  };
 
   const handleFile = async (selectedFile: File) => {
     if (!selectedFile.name.endsWith('.md')) {
@@ -39,13 +63,26 @@ export default function CVPage() {
   };
 
   const handleGenerate = async () => {
-    if (!file) return;
+    if (!file || !user) return;
+    if (!selectedTemplate) {
+      alert("Please select a template.");
+      return;
+    }
+    if (!jobTitle || !company) {
+      alert("Please enter the job title and company.");
+      return;
+    }
+
     setIsGenerating(true);
     try {
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("document_type", "cv");
+      formData.append("doc_type", "cv");
       formData.append("format", format);
+      formData.append("user_id", user.id);
+      formData.append("template_name", selectedTemplate);
+      formData.append("job_title", jobTitle);
+      formData.append("company", company);
 
       const res = await fetch("/api/generate", { 
         method: "POST", 
@@ -59,7 +96,7 @@ export default function CVPage() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `Generated_CV.${format}`;
+      a.download = `Generated_CV_${company.replace(/\s+/g, '_')}.${format}`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -76,9 +113,7 @@ export default function CVPage() {
   const resetFlow = () => {
     setFile(null);
     setParsedSections(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   return (
@@ -89,11 +124,50 @@ export default function CVPage() {
           Create CV
         </h1>
         <p className="text-slate-500 dark:text-zinc-400">
-          Upload your job-specific markdown file to generate a tailored CV.
+          Provide job details and upload your markdown file to generate a tailored CV.
         </p>
       </div>
 
-      <div className="space-y-4 mt-8">
+      <div className="space-y-6 mt-8">
+        
+        {/* Step 1: Details */}
+        <div className="p-6 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-surface grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-slate-700 dark:text-zinc-300">Job Title *</label>
+            <input 
+              type="text" 
+              value={jobTitle}
+              onChange={(e) => setJobTitle(e.target.value)}
+              placeholder="e.g. Senior Frontend Engineer"
+              className="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 focus:bg-white dark:focus:bg-zinc-950 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-sm"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-slate-700 dark:text-zinc-300">Company *</label>
+            <input 
+              type="text" 
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
+              placeholder="e.g. Vercel"
+              className="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 focus:bg-white dark:focus:bg-zinc-950 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-sm"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-slate-700 dark:text-zinc-300">Base Template *</label>
+            <select 
+              value={selectedTemplate}
+              onChange={(e) => setSelectedTemplate(e.target.value)}
+              className="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 focus:bg-white dark:focus:bg-zinc-950 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-sm"
+            >
+              <option value="" disabled>Select a template</option>
+              {templates.map(t => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Step 2: File Upload */}
         {!file && !isUploading && (
           <div
             className={`relative group flex flex-col items-center justify-center p-16 border-2 border-dashed rounded-2xl transition-all duration-200 bg-surface ${
@@ -133,9 +207,7 @@ export default function CVPage() {
               className="hidden" 
               ref={fileInputRef}
               onChange={(e) => {
-                if (e.target.files && e.target.files.length > 0) {
-                  handleFile(e.target.files[0]);
-                }
+                if (e.target.files && e.target.files.length > 0) handleFile(e.target.files[0]);
               }}
             />
             <button 
@@ -156,7 +228,7 @@ export default function CVPage() {
 
         {file && parsedSections && (
           <div className="space-y-6 animate-in fade-in duration-300">
-            <div className="flex items-center justify-between p-4 rounded-xl border border-slate-200 dark:border-zinc-800 bg-surface">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 rounded-xl border border-slate-200 dark:border-zinc-800 bg-surface gap-4">
               <div className="flex items-center gap-3">
                 <button 
                   onClick={resetFlow}
@@ -168,12 +240,14 @@ export default function CVPage() {
                   <h2 className="text-sm font-semibold text-slate-900 dark:text-zinc-100 flex items-center gap-2">
                     {file.name}
                   </h2>
-                  <p className="text-xs text-slate-500 dark:text-zinc-400">Ready for generation</p>
+                  <p className="text-xs text-slate-500 dark:text-zinc-400 flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-500" /> Content ready
+                  </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 bg-slate-100 dark:bg-zinc-900 p-1 rounded-lg">
+              <div className="flex items-center gap-4 w-full md:w-auto">
+                <div className="flex items-center gap-2 bg-slate-100 dark:bg-zinc-900 p-1 rounded-lg shrink-0">
                   <button
                     onClick={() => setFormat('docx')}
                     className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${format === 'docx' ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 shadow-sm' : 'text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-300'}`}
@@ -189,11 +263,11 @@ export default function CVPage() {
                 </div>
                 <button 
                   onClick={handleGenerate}
-                  disabled={isGenerating}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-medium transition-all shadow-sm disabled:opacity-70 disabled:pointer-events-none"
+                  disabled={isGenerating || !jobTitle || !company || !selectedTemplate}
+                  className="w-full md:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-medium transition-all shadow-sm disabled:opacity-70 disabled:pointer-events-none"
                 >
                   {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileOutput className="w-4 h-4" />}
-                  Generate File
+                  Generate
                 </button>
               </div>
             </div>

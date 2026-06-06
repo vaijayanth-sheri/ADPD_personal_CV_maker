@@ -62,6 +62,8 @@ async def generate_document(
     user_id: str = Form(...),
     template_name: str = Form(...),
     format: str = Form("docx"),
+    job_title: str = Form("Unknown"),
+    company: str = Form("Unknown"),
     file: UploadFile = File(...)
 ):
     if not supabase:
@@ -97,6 +99,16 @@ async def generate_document(
         generate_cv(md_text, template_path, output_path)
     else:
         raise HTTPException(status_code=400, detail="Invalid document type")
+        
+    try:
+        supabase.table("applications").insert({
+            "user_id": user_id,
+            "job_title": job_title,
+            "company": company,
+            "doc_type": doc_type
+        }).execute()
+    except Exception as e:
+        print(f"Failed to log application in Supabase: {e}")
         
     # Return the file directly as a downloadable response
     return FileResponse(
