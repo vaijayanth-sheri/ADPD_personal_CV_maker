@@ -47,6 +47,16 @@ export default function CVPage() {
     setParsedSections(null);
     
     try {
+      // Auto-extract job title and company from the md structure
+      const fileText = await selectedFile.text();
+      const titleMatch = fileText.match(/\*\*Application for (.*?)\*\*/i) || fileText.match(/Application for (.*)/i);
+      if (titleMatch) setJobTitle(titleMatch[1].trim());
+      else setJobTitle("Target Role");
+      
+      const lines = fileText.split('\n').map(l => l.trim()).filter(l => l.length > 0 && !l.startsWith('#') && !l.startsWith('*'));
+      if (lines.length > 0) setCompany(lines[0]);
+      else setCompany("Target Company");
+
       const formData = new FormData();
       formData.append("file", selectedFile);
       const res = await fetch("/api/parse-markdown", { method: "POST", body: formData });
@@ -66,10 +76,6 @@ export default function CVPage() {
     if (!file || !user) return;
     if (!selectedTemplate) {
       alert("Please select a template.");
-      return;
-    }
-    if (!jobTitle || !company) {
-      alert("Please enter the job title and company.");
       return;
     }
 
@@ -131,28 +137,8 @@ export default function CVPage() {
       <div className="space-y-6 mt-8">
         
         {/* Step 1: Details */}
-        <div className="p-6 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-surface grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-slate-700 dark:text-zinc-300">Job Title *</label>
-            <input 
-              type="text" 
-              value={jobTitle}
-              onChange={(e) => setJobTitle(e.target.value)}
-              placeholder="e.g. Senior Frontend Engineer"
-              className="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 focus:bg-white dark:focus:bg-zinc-950 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-sm"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-slate-700 dark:text-zinc-300">Company *</label>
-            <input 
-              type="text" 
-              value={company}
-              onChange={(e) => setCompany(e.target.value)}
-              placeholder="e.g. Vercel"
-              className="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 focus:bg-white dark:focus:bg-zinc-950 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-sm"
-            />
-          </div>
-          <div className="space-y-1.5">
+        <div className="p-6 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-surface">
+          <div className="space-y-1.5 max-w-md mx-auto">
             <label className="text-sm font-medium text-slate-700 dark:text-zinc-300">Base Template *</label>
             <select 
               value={selectedTemplate}
@@ -263,7 +249,7 @@ export default function CVPage() {
                 </div>
                 <button 
                   onClick={handleGenerate}
-                  disabled={isGenerating || !jobTitle || !company || !selectedTemplate}
+                  disabled={isGenerating || !selectedTemplate}
                   className="w-full md:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-medium transition-all shadow-sm disabled:opacity-70 disabled:pointer-events-none"
                 >
                   {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileOutput className="w-4 h-4" />}

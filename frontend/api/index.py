@@ -18,6 +18,9 @@ def read_root():
     return {"message": "Welcome to ADPD Backend API"}
 
 import os
+import sys
+sys.path.append(os.path.dirname(__file__))
+
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
