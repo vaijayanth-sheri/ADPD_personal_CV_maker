@@ -37,8 +37,8 @@ export default function TemplatesPage() {
       // Filter out standard placeholder if present
       const files = data.filter(f => f.name !== '.emptyFolderPlaceholder').map(f => ({
         name: f.name,
-        id: f.id,
-        created_at: f.created_at,
+        id: f.id || "",
+        created_at: f.created_at || new Date().toISOString(),
         size: f.metadata?.size || 0
       }));
       setTemplates(files);
