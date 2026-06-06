@@ -1,0 +1,548 @@
+# Product Requirements Document (PRD)
+
+## Project Name
+
+Application Document Personalization Dashboard (ADPD)
+
+Version: V1
+
+Status: Design Phase
+
+Owner: Vaijayanth Sheri
+
+---
+
+# 1. Product Vision
+
+The Application Document Personalization Dashboard is a personal productivity platform designed to eliminate manual editing of CVs and cover letters.
+
+The platform allows users to store professionally formatted DOCX templates and automatically apply structured content updates provided through Markdown files.
+
+The system focuses exclusively on document personalization and formatting preservation.
+
+No AI generation is performed within the platform.
+
+The objective is to reduce repetitive editing work from 20–30 minutes per application to less than 60 seconds.
+
+---
+
+# 2. Problem Statement
+
+Current workflow:
+
+1. User receives customized CV content.
+2. User receives customized Cover Letter content.
+3. User manually opens CV template.
+4. User manually copies content.
+5. User manually updates sections.
+6. User checks formatting.
+7. User exports final files.
+
+Pain Points:
+
+* Repetitive copy-paste work
+* Formatting mistakes
+* Missed section updates
+* Inconsistent document versions
+* Time-consuming editing process
+
+Desired Outcome:
+
+User uploads a structured Markdown change file and receives:
+
+* Updated CV DOCX
+* Updated Cover Letter DOCX
+
+while preserving the original template formatting exactly.
+
+---
+
+# 3. Product Scope
+
+Included:
+
+* User authentication
+* Template management
+* Markdown upload
+* CV personalization
+* Cover letter personalization
+* Download generated files
+* Change preview
+* Application history
+
+Excluded:
+
+* AI content generation
+* Job scraping
+* Company research
+* Resume scoring
+* ATS optimization
+* LinkedIn integration
+* PDF storage
+
+---
+
+# 4. Core Principle
+
+The dashboard must preserve:
+
+* Fonts
+* Font sizes
+* Colors
+* Margins
+* Icons
+* Tables
+* Header/Footer
+* Page breaks
+* Images
+* Layout structure
+* Section ordering
+
+Only text content inside predefined placeholders may change.
+
+No formatting modifications are allowed.
+
+---
+
+# 5. User Flow
+
+## Initial Setup
+
+User creates account.
+
+User uploads:
+
+* CV Template.docx
+* Cover Letter Template.docx
+
+System scans templates.
+
+System identifies placeholders.
+
+System stores:
+
+* Template metadata
+* Placeholder mappings
+
+---
+
+## Personalization Workflow
+
+Step 1
+
+User uploads:
+
+custom_application.md
+
+Step 2
+
+System validates markdown structure.
+
+Step 3
+
+System detects:
+
+* CV updates
+* Cover Letter updates
+
+Step 4
+
+Preview screen displayed.
+
+Step 5
+
+User confirms.
+
+Step 6
+
+System generates:
+
+* Customized CV.docx
+* Customized CoverLetter.docx
+
+Step 7
+
+User downloads files.
+
+Generated files are not permanently stored.
+
+---
+
+# 6. Supported Template Count
+
+Maximum Templates per User:
+
+CV Templates:
+
+* 3
+
+Cover Letter Templates:
+
+* 3
+
+Example:
+
+Energy CV
+Data Science CV
+Product CV
+
+Each may have matching cover letter templates.
+
+---
+
+# 7. Markdown Structure
+
+The dashboard accepts only structured markdown.
+
+Example:
+
+# CV
+
+## SUMMARY
+
+Updated summary text
+
+## PROJECT_PVLIB
+
+Updated project description
+
+## SKILLS
+
+Python
+Dash
+Streamlit
+
+# COVER_LETTER
+
+## INTRODUCTION
+
+Custom introduction
+
+## MOTIVATION
+
+Custom motivation section
+
+## CLOSING
+
+Closing paragraph
+
+---
+
+System must reject malformed structures.
+
+Validation feedback should be human-readable.
+
+---
+
+# 8. Placeholder System
+
+Template placeholders are mandatory.
+
+Examples:
+
+{{SUMMARY}}
+
+{{SKILLS}}
+
+{{PROJECT_PVLIB}}
+
+{{PROJECT_ENERGYSIM}}
+
+{{INTRODUCTION}}
+
+{{MOTIVATION}}
+
+{{CLOSING}}
+
+The engine replaces only matching placeholders.
+
+No free-text searching.
+
+No AI matching.
+
+No guessing.
+
+---
+
+# 9. Dynamic Cover Letter Sections
+
+Cover letters require dynamic sections.
+
+Supported operations:
+
+Replace Section
+
+Add Section
+
+Remove Section
+
+Reorder Section
+
+Example:
+
+INTRODUCTION
+
+MOTIVATION
+
+PROJECT_MATCH
+
+COMPANY_FIT
+
+CLOSING
+
+System must support hiding unused sections without breaking formatting.
+
+---
+
+# 10. User Interface Requirements
+
+Design Philosophy:
+
+Professional
+Minimal
+Fast
+Visually engaging
+Low cognitive load
+
+The dashboard should feel lighter than enterprise software and more enjoyable than traditional document editors.
+
+---
+
+# 11. UI Layout
+
+Desktop-first.
+
+Sidebar Navigation:
+
+Home
+
+Templates
+
+Applications
+
+History
+
+Settings
+
+---
+
+# 12. Home Screen
+
+Large drag-and-drop zone.
+
+Upload Markdown File
+
+Recent Applications
+
+Processing Statistics
+
+Quick Actions
+
+Visual cards only.
+
+Avoid large tables.
+
+---
+
+# 13. Upload Experience
+
+Drag & Drop Area
+
+Animated upload feedback
+
+File validation indicator
+
+Section detection preview
+
+Progress timeline
+
+Example:
+
+Template Loaded
+
+Sections Detected
+
+Changes Applied
+
+Documents Generated
+
+Ready to Download
+
+---
+
+# 14. Preview Screen
+
+Before generation:
+
+Display:
+
+Section Name
+
+Existing Content
+
+New Content
+
+Changed Lines
+
+Users must clearly understand what will change.
+
+---
+
+# 15. Template Management
+
+Template Library Page
+
+Features:
+
+Upload Template
+
+Rename Template
+
+Delete Template
+
+Set Default Template
+
+Placeholder Viewer
+
+Template Health Check
+
+---
+
+# 16. History Page
+
+Store metadata only.
+
+Application Name
+
+Date
+
+Template Used
+
+Generated Files Count
+
+No generated DOCX storage.
+
+User downloads and stores locally.
+
+---
+
+# 17. Backend Requirements
+
+Framework:
+
+Python FastAPI
+
+Responsibilities:
+
+Template Processing
+
+Placeholder Detection
+
+Markdown Parsing
+
+Document Generation
+
+Validation
+
+File Export
+
+---
+
+# 18. Frontend Requirements
+
+Framework:
+
+Next.js
+
+Responsibilities:
+
+UI
+
+Authentication
+
+File Upload
+
+Preview
+
+History
+
+Downloads
+
+---
+
+# 19. Database
+
+Supabase
+
+Tables:
+
+users
+
+templates
+
+template_placeholders
+
+application_history
+
+settings
+
+No generated documents stored.
+
+Only metadata retained.
+
+---
+
+# 20. Storage Strategy
+
+Store:
+
+Templates
+
+Placeholder Metadata
+
+Settings
+
+Do Not Store:
+
+Generated CVs
+
+Generated Cover Letters
+
+Temporary Outputs
+
+Temporary files deleted automatically after download.
+
+---
+
+# 21. Performance Targets
+
+Markdown Validation:
+< 1 second
+
+Document Generation:
+< 5 seconds
+
+File Download Ready:
+< 10 seconds
+
+Supported File Size:
+10 MB
+
+---
+
+# 22. Security
+
+Authenticated access only.
+
+Private user data.
+
+Template isolation.
+
+Automatic temporary file cleanup.
+
+No third-party document sharing.
+
+No external AI services.
+
+---
+

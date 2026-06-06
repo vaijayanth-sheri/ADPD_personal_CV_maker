@@ -1,0 +1,96 @@
+		
+
+
+
+
+PROFILE SUMMARY
+Working on electricity network data within a German utility, preparing datasets for asset simulation and long-term planning 
+Focus on building tools that are usable by non-developers for real-world planning and operational decisions 
+Experience connecting real-world data → simulation workflows → infrastructure decisions 
+Built multiple end-to-end energy-focused tools (simulation GUIs, dashboards, optimization prototypes) 
+Currently extending capabilities toward production-oriented energy software systems
+EDUCATION
+STUDENT EXPERIENCE
+INTERNSHIP
+PROJECTS 
+TECHNICAL SKILLS 
+Energy Systems & Optimization
+OEMOF | PyPSA | PVLib | WindPowerLib | DemandLib | Energy System Simulation | Battery & PV Integration
+Data Engineering & Infrastructure Context
+PostgreSQL | SQL | Data Cleaning & Validation | Time-Series Processing | ETL Workflows
+Backend & Computational Systems
+Python | Pandas | NumPy | API Integration | FastAPI | Data Pipelines
+Frontend & Interactive Tools
+Streamlit | Dash | Plotly | React (basic) | Dashboard Development
+System Design & Architecture
+Modular Architecture | Data → Model → Output Pipelines | API-Based Systems
+Core Strengths
+Systems Thinking | Data-to-Decision Approach | Problem Solving
+
+LANGUAGES 
+English (C1)	German (B1 Actively Learning)		Telugu		Hindi
+
+
+30.04.2026, Munich
+--- TABLES ---
+10.2025 - Present
+Technische Hochschule Rosenheim
+
+Masters in Hydrogen Technology
+10.2020 - 03.2024
+Hochschule Nordhausen university of applied sciences
+
+Masters in Renewable Energy Systems
+11.2025 - Present
+Stadtwerke München, Germany
+
+Working Student — Utility Infrastructure Asset Simulation
+
+Process and structure large-scale electricity network datasets (asset + time-series) using PostgreSQL for simulation-ready use
+Perform data validation, cleaning, and alignment for infrastructure modeling workflows
+Prepare inputs for asset lifecycle, risk, and cost simulations supporting long-term planning
+Ensure consistency across asset hierarchies (cables, transformers, substations) and measurement mappings
+Work with real-world, incomplete datasets, resolving inconsistencies affecting downstream models
+Ensure data reliability for simulation workflows that influence infrastructure planning and investment decisions
+
+Master Thesis at Hochschule Nordhausen; Nordhausen, Germany
+08.2023 08.2023 - 03.2024
+Integration of Open-Source Tools in GUI for Energy System Modelling
+
+Built Python-based interfaces integrating PVLib, WindPowerLib, and DemandLib for energy system modeling
+Generated simulation-ready time-series data for OEMOF-based system analysis
+Performed cross-tool validation (PV, wind, demand) to improve modeling accuracy and consistency
+Enabled structured comparison of modeling approaches for decision-making in energy planning
+05.2023 - 07.2023
+Techno-Co-labs Software Inc.; Remote, India
+
+Intern as DATA Scientist
+
+Performed exploratory data analysis and feature engineering to support forecasting and classification models 
+Developed machine learning models (logistic regression, random forest, gradient boosting) for predictive analytics tasks 
+Structured and transformed raw data into model-ready formats, improving pipeline efficiency and reproducibility 
+Delivered data-driven insights through visualizations and reports to support business decision-making 
+02.2026 - 04.2026
+Solar Panel Auto Layout & Energy Estimation Tool
+
+Developed a full-stack application for automated PV system planning, combining geospatial inputs, engineering constraints, and energy yield estimation
+Built a modular backend (FastAPI + Python) integrating PVGIS data to generate simulation-ready energy outputs and system KPIs
+Implemented a layout optimization engine handling spatial constraints (orientation, spacing, obstacle avoidance) for realistic system design
+Designed a React/Next.js frontend with interactive map-based workflows (Leaflet) to enable intuitive system configuration and visualization
+Structured outputs (CSV/JSON/PDF) to support downstream analysis, reporting, and decision-making workflows
+08.2025 - 01.2026
+PacCEM / PyPSA GUI
+
+Developed GUI for capacity expansion modeling using PyPSA
+Enabled scenario-based simulation and structured output generation for planning analysis
+08.2025 - 09.2025
+PV / Wind Data Generator Tools
+
+Built tools for generating high-quality renewable generation datasets from multiple sources
+Implemented validation, normalization, and export pipelines for modeling workflows
+06.2025 - 07.2025
+GridAware (EV + pricing optimization)
+
+Developed optimization logic for identifying cost-optimal charging windows using time-series price data
+Built end-to-end data pipeline (API → processing → decision output)
+Visualized results for actionable decision-making
