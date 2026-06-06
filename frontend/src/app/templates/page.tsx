@@ -119,7 +119,7 @@ export default function TemplatesPage() {
               Upload Template
             </h3>
             <p className="text-sm text-slate-500 dark:text-zinc-400 mb-6">
-              Select a .docx file to use as a base for your generations.
+              Select a .docx file to use as a base for your CV or Cover Letter generations.
             </p>
             <input 
               type="file" 

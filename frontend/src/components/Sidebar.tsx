@@ -13,9 +13,10 @@ function cn(...inputs: ClassValue[]) {
 
 const navItems = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
+  { name: "Create CV", href: "/cv", icon: Briefcase },
+  { name: "Create Cover Letter", href: "/cover-letter", icon: FileText },
   { name: "Templates", href: "/templates", icon: FileText },
-  { name: "Applications", href: "/applications", icon: Briefcase },
-  { name: "History", href: "/history", icon: History },
+  { name: "Profile", href: "/profile", icon: Sparkles },
 ];
 
 export function Sidebar() {
