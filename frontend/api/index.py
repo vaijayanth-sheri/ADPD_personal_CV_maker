@@ -18,7 +18,34 @@ def read_root():
     return {"message": "Welcome to ADPD Backend API"}
 
 import os
+from fastapi import FastAPI, File, UploadFile, Form, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from supabase import create_client, Client
 from docx_processor import parse_markdown_to_dict, generate_cover_letter, generate_cv
+import uvicorn
+
+app = FastAPI(title="ADPD Backend API", version="1.0.0")
+
+# CORS setup
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Initialize Supabase client
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY")
+if SUPABASE_URL and SUPABASE_KEY:
+    supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+else:
+    supabase = None
+
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to ADPD Backend API"}
 
 @app.post("/api/parse-markdown")
 async def parse_markdown(file: UploadFile = File(...)):
@@ -28,18 +55,36 @@ async def parse_markdown(file: UploadFile = File(...)):
     return {"status": "success", "parsed_sections": parsed_data}
 
 @app.post("/api/generate")
-async def generate_document(doc_type: str, file: UploadFile = File(...)):
+async def generate_document(
+    doc_type: str = Form(...), 
+    user_id: str = Form(...),
+    template_name: str = Form(...),
+    file: UploadFile = File(...)
+):
+    if not supabase:
+        raise HTTPException(status_code=500, detail="Supabase not configured in backend.")
+        
     content = await file.read()
     md_text = content.decode("utf-8")
     
     os.makedirs("outputs", exist_ok=True)
+    os.makedirs("temp_templates", exist_ok=True)
+    
+    # Download the template from Supabase Storage
+    template_path = f"temp_templates/{template_name}"
+    storage_path = f"{user_id}/{template_name}"
+    
+    try:
+        res = supabase.storage.from_("user_templates").download(storage_path)
+        with open(template_path, "wb") as f:
+            f.write(res)
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=f"Template not found in storage: {str(e)}")
     
     if doc_type == "cover_letter":
-        template_path = "../templates/CoverLetter_Template.docx"
         output_path = f"outputs/Customized_CoverLetter.docx"
         generate_cover_letter(md_text, template_path, output_path)
     elif doc_type == "cv":
-        template_path = "../templates/CV_Vaijayanth_Sheri_V1.docx"
         output_path = f"outputs/Customized_CV.docx"
         generate_cv(md_text, template_path, output_path)
     else:
